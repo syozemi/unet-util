@@ -1,35 +1,30 @@
+# サンプル
+# mongo = Mongo()
+# band内の画像を処理してデータベースに保存
+# mongo.prepare()
+# 全画像取得
+# data = mongo.all_load()
+# print(data)
+# print(type(data))
 import pymongo
-from pymongo.errors import BulkWriteError
 import numpy as np
-import matplotlib.pyplot as plt
-import pickle
-import os
 import process_data as pro
 import cv2 as cv
-#
-# # mongodb へのアクセスを確立
-# client = pymongo.MongoClient('localhost', 27017)
-#
-# # データベースを作成 (名前: my_database)
-# db = client.my_database
-#
-# # コレクションを作成 (名前: my_collection)
-# co = db.my_collection
-#
-# # なんか適当に保存
-# co.insert_one({"test": 3})
-#
-# # 全部とってくる
-# for data in co.find():
-#     print(data)
 
-# 教師用データを配列として返す
-# typeは{'original': 'valid'}のような辞書でどのタイプの画像を返すかを指定する
 class Mongo(object):
     def __init__(self):
         client = pymongo.MongoClient('localhost', 27017)
         db = client.cell_image
         self.train = db.train
+        self.index = 0
+
+    # band内の画像を処理してデータベースに保存
+    def prepare(self):
+        if self.train.count() > 0:
+            print('すでに{0}件画像が保存されています\n更新したい場合はデータベースを削除してください'.format(self.train.count()))
+        else:
+            print('実行中')
+            self.save()
 
     # prepareから呼び出せれる
     # bandの中に展開されたファイル群から画像の配列をデータベースに保存する
@@ -53,17 +48,36 @@ class Mongo(object):
                 label = pro.create_mask_label(cell, nucleus)
 
                 datum = {'original': original.tolist(), 'label': label.tolist()}
+                # 遅いからバルクインサートに変えたいけど一回しか実行しないからとりあえず放置
                 self.train.insert_one(datum)
-                # data.append(datum)
 
             else:
                 pass
+        print('{0}件の画像がデータベースに保存されました'.format(self.train.count()))
 
+    # 全画像取得
     def all_load(self):
         return list(self.train.find())
-# 
-# mongo = Mongo()
-# mongo.save()
-# data = mongo.all_load()
-# print(data)
-# print(type(data))
+
+    # 画像をデータベースからnum件ずつ取り出す
+    def next_batch(self, num):
+        index = self.index
+        length = self.train.count()
+
+        if self.index + num > length:
+            array1 = list(self.train.find().skip(index))
+            array2 = list(self.train.find().limit(num-(length-self.index)))
+            x = array1 + array2
+            self.index = num - (length-self.index)
+            return x
+        else:
+            x = list(self.train.find().skip(index).limit(num))
+            self.index = self.index + num
+            return x
+            # return list(self.train.find().batch_size(num))
+
+    def divide_data(self, rate):
+        data = np.random.permutation(list(self.train.find(projection={'original':False, 'label':False})))
+        self.train_data = data[:int(self.train.count()*rate)]
+        self.test_data = data[int(self.train.count()*rate):]
+        return self.train_data, self.test_data
