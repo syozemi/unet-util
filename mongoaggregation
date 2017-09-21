@@ -1,0 +1,142 @@
+
+ db.createCollection("nest")
+{ "ok" : 1 }
+> show collections
+nest
+> db.nest.insert({"words":{"hi":1, "foo":2, "あ": 100}}, "url": "http://jfeoijfr"})
+2017-09-21T11:22:14.228+0900 E QUERY    [thread1] SyntaxError: missing ) after argument list @(shell):1:59
+> db.nest.insert({"words":{"hi":1, "foo":2, "あ": 100}, "url": "http://jfeoijfr"}))
+WriteResult({ "nInserted" : 1 })
+> db.nest.find()
+{ "_id" : ObjectId("59c3226b213385a483c5bafb"), "words" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "url" : "http://jfeoijfr" }
+> db.nest.find({words: {$exists: true}})
+{ "_id" : ObjectId("59c3226b213385a483c5bafb"), "words" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "url" : "http://jfeoijfr" }
+> db.nest.find({words.hi: {$exists: true}})
+2017-09-21T11:23:39.993+0900 E QUERY    [thread1] SyntaxError: missing : after property id @(shell):1:19
+> db.nest.find({"words.hi": {$exists: true}})
+{ "_id" : ObjectId("59c3226b213385a483c5bafb"), "words" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "url" : "http://jfeoijfr" }
+> db.nest.find({"words.h": {$exists: true}})
+> db.nest.insert({"words":{"hi":5, "bar":2, "あ": 40}, "url": "http://frefoijfr"})))
+WriteResult({ "nInserted" : 1 })
+> db.nest.find()
+{ "_id" : ObjectId("59c3226b213385a483c5bafb"), "words" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "url" : "http://jfeoijfr" }
+{ "_id" : ObjectId("59c323ba213385a483c5bafc"), "words" : { "hi" : 5, "bar" : 2, "あ" : 40 }, "url" : "http://frefoijfr" }
+> db.nest.aggregate([{$match: {"words.hi": {$exists: true}}, $group: {total: {$sum: "$words.hi"}}})
+...
+... ])
+2017-09-21T11:31:27.042+0900 E QUERY    [thread1] SyntaxError: missing ] after element list @(shell):1:96
+> db.nest.aggregate([{$match: {"words.hi": {$exists: true}}, $group: {total: {$sum: "$words.hi"}}}])
+assert: command failed: {
+        "ok" : 0,
+        "errmsg" : "A pipeline stage specification object must contain exactly one field.",
+        "code" : 40323,
+        "codeName" : "Location40323"
+} : aggregate failed
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+
+2017-09-21T11:31:37.271+0900 E QUERY    [thread1] Error: command failed: {
+        "ok" : 0,
+        "errmsg" : "A pipeline stage specification object must contain exactly one field.",
+        "code" : 40323,
+        "codeName" : "Location40323"
+} : aggregate failed :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+> db.nest.aggregate([{$match: {"words.hi": {$exists: true}}, $group: {url: "$url", total: {$sum: "$words.hi"}}}])
+assert: command failed: {
+        "ok" : 0,
+        "errmsg" : "A pipeline stage specification object must contain exactly one field.",
+        "code" : 40323,
+        "codeName" : "Location40323"
+} : aggregate failed
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+
+2017-09-21T11:32:42.264+0900 E QUERY    [thread1] Error: command failed: {
+        "ok" : 0,
+        "errmsg" : "A pipeline stage specification object must contain exactly one field.",
+        "code" : 40323,
+        "codeName" : "Location40323"
+} : aggregate failed :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+> db.nest.aggregate([{$group: {url: "$url", total: {$sum: "$words.hi"}}}])
+assert: command failed: {
+        "ok" : 0,
+        "errmsg" : "The field 'url' must be an accumulator object",
+        "code" : 40234,
+        "codeName" : "Location40234"
+} : aggregate failed
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+
+2017-09-21T11:33:02.271+0900 E QUERY    [thread1] Error: command failed: {
+        "ok" : 0,
+        "errmsg" : "The field 'url' must be an accumulator object",
+        "code" : 40234,
+        "codeName" : "Location40234"
+} : aggregate failed :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+> db.nest.aggregate([{$group: {total: {$sum: "$words.hi"}}}])
+assert: command failed: {
+        "ok" : 0,
+        "errmsg" : "a group specification must include an _id",
+        "code" : 15955,
+        "codeName" : "Location15955"
+} : aggregate failed
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+
+2017-09-21T11:33:20.962+0900 E QUERY    [thread1] Error: command failed: {
+        "ok" : 0,
+        "errmsg" : "a group specification must include an _id",
+        "code" : 15955,
+        "codeName" : "Location15955"
+} : aggregate failed :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+doassert@src/mongo/shell/assert.js:16:14
+assert.commandWorked@src/mongo/shell/assert.js:370:5
+DBCollection.prototype.aggregate@src/mongo/shell/collection.js:1319:5
+@(shell):1:1
+> db.nest.aggregate([{$group: {_id: "$url", total: {$sum: "$words.hi"}}}])
+{ "_id" : "http://frefoijfr", "total" : 5 }
+{ "_id" : "http://jfeoijfr", "total" : 1 }
+> db.find()
+2017-09-21T11:33:42.339+0900 E QUERY    [thread1] TypeError: db.find is not a function :
+@(shell):1:1
+> db.nest.find()
+{ "_id" : ObjectId("59c3226b213385a483c5bafb"), "words" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "url" : "http://jfeoijfr" }
+{ "_id" : ObjectId("59c323ba213385a483c5bafc"), "words" : { "hi" : 5, "bar" : 2, "あ" : 40 }, "url" : "http://frefoijfr" }
+> db.nest.aggregate([{$group: {_id: "$words", total: {$sum: "$words.hi"}}}])
+{ "_id" : { "hi" : 5, "bar" : 2, "あ" : 40 }, "total" : 5 }
+{ "_id" : { "hi" : 1, "foo" : 2, "あ" : 100 }, "total" : 1 }
+> db.nest.aggregate([{$group: {_id: "a", total: {$sum: "$words.hi"}}}])
+{ "_id" : "a", "total" : 6 }
+> db.nest.aggregate([{$group: {_id: "a", total: {$sum: "$words.あ"}}}])
+{ "_id" : "a", "total" : 140 }
+> db.nest.aggregate([{$group: {_id: "a", total: {$sum: "$words.foo"}}}])
+{ "_id" : "a", "total" : 2 }
+>
